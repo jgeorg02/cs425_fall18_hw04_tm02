@@ -1,0 +1,67 @@
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="author" content="Stavroulla Kousparou, Joanna Georgiou">
+    <meta name="description" content="Assignment 2 for CS425 Fall2018">
+    <meta name="keywords" content="Assignment 4, CS425, Fall2018, HTML, PHP, Javascript, SunnyCY">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!-- /Required meta tags -->
+    <title>SunnyCY</title>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.2/css/all.css"
+          integrity="sha384-/rXc/GQVaYpyDdyxK+ecHPVYJSN9bmVFBvjA/9eOB+pb3F2w2N6fc5qB9Ew5yIns"
+          crossorigin="anonymous">
+    <!-- css -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- /css -->
+
+    <!-- favicon -->
+    <link rel="shortcut icon" type="image/png" href="img/favicon.png"/>
+    <!-- /favicon -->
+</head>
+<body>
+
+<!-- Banner -->
+<div class="banner">
+    <div class="banner-text">
+        <h1>SunnyCY</h1>
+        <button class="btn btn-primary" onclick="document.getElementById('login_modal').style.display='block'" style="width:auto;">Login
+        </button>
+    </div>
+</div>
+<!-- /Banner -->
+
+<!-- Modal Login -->
+<div id="login_modal" class="modal">
+
+    <form class="modal-content animate" action="">
+        <div class="imgcontainer">
+            <span onclick="document.getElementById('login_modal').style.display='none'" class="close"
+                  title="Close Modal">&times;</span>
+            <img src="img/img_avatar.png" alt="Avatar" class="avatar">
+        </div>
+
+        <article style="background-color:#f1f1f1">
+            <div class="container padding-top-bottom">
+                <label id="username"><b>Username</b></label>
+                <input type="text" placeholder="Enter Username" name="username" required>
+
+                <label id="password"><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" name="password" required>
+
+                <button class="btn btn-primary" type="submit" style="width:100%">Login</button>
+            </div>
+        </article>
+    </form>
+</div>
+
+<!-- Modal Login -->
+
+<script src="js/modal.js"></script>
+
+</body>
+</html>
