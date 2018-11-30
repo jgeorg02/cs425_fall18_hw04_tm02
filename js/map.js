@@ -2,13 +2,14 @@
 var zoom = 12;
 var lat = 35.1522437;
 var lon = 33.3751678;
+var id_pv = 0;
 var mymap = L.map('mapid').setView([lat, lon], zoom);
 var phpfile = "";
 var pruneCluster = new PruneClusterForLeaflet();
 
 // set black marker
 var blackIcon = L.icon({
-    iconUrl: 'img/black.svg',
+    iconUrl: 'black.svg',
 
     iconSize: [23.5, 31.25], // size of the icon
 
@@ -70,7 +71,7 @@ function editModal(lat, lon, exists, data) {
     form += '</label><input type="date" class="form-control" id="commission" name="commission">' +
         '</div><div class="form-group"><label for="description">Description</label><textarea name="description" id="description" cols="30" rows="5" placeholder="' + data.description + '"></textarea>' +
         '</div><div class="form-group"><label for="power">System Power:</label><input type="text" class="form-control" id="power" name="power" placeholder="' + data.power + '">' +
-        '</div><div class="form-group"><label for="production">Annual Production:</label><input type="text" class="form-control" id="production" name="production" placeholder="' + data.power + '">' +
+        '</div><div class="form-group"><label for="production">Annual Production:</label><input type="text" class="form-control" id="production" name="production" placeholder="' + data.production + '">' +
         '</div><div class="form-group"><label for="co2">CO2 Avoided:</label><input type="text" class="form-control" id="co2" name="co2" placeholder="' + data.cO2 + '">' +
         '</div><div class="form-group"><label for="reimbursement">Reimbursement:</label><input type="text" class="form-control" id="reimbursement" name="reimbursement" placeholder="' + data.reimbursement + '">' +
         '</div><div class="form-group"><label for="modules">Solar Panel Modules:</label><input type="text" class="form-control" id="modules" name="modules" placeholder="' + data.modules + '">' +
@@ -101,7 +102,7 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
 
         var info = "<div class='figure' style='background-image: url('" + data.photo + "');'></div>" + "<br /><b>Location:</b> " + data.location + " " + data.coordinates + "<br /><b>Operator: </b> " +
             data.operator + "<br /><b>Commission: </b> " + data.commission + "<br /><b>Description: </b> " + data.description +
-            +"<br /><b>System Power: </b> " + data.power + "<br /><b>Annual Production: </b> " + data.production +
+            "<br /><b>System Power: </b> " + data.power + "<br /><b>Annual Production: </b> " + data.production +
             "<br /><b>CO2 Avoided: </b> " + data.cO2 + "<br /><b>Reimbursement: </b> " + data.reimbursement +
             "<br /><b>Solar Panel Modules: </b> " + data.modules + "<br /><b>Azimuth Angle: </b> " + data.azimuth +
             "<br /><b>Inclination Angle: </b> " + data.inclination + "<br /><b>Communication: </b> " + data.communication +
@@ -114,7 +115,7 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
 
         $('#editPV').click(function (e) {
             e.preventDefault();
-
+			id_pv = data.id;
             editModal(lat, lon, 1, data);
         });
 
@@ -138,15 +139,46 @@ function mapLoad() {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(mymap);
 
-    ajaxCall("GET", phpfile, "", "text", loadPVs);
-
-    pruneCluster.ProcessView();
+    ajaxCall("GET", "get.php", "", "json", loadPVs);
 
 }
 
-function loadPVs() {
+function loadPVs(json) {
 
-    var pv = {
+    var obj;
+    var pv;
+
+    for (var i = 0; i < json.length; i++) {
+
+        obj = json[i];
+
+        pv = {
+            id: obj.id,
+            name: obj.Name,
+            operator: obj.Operator,
+            commission: obj.ComissionDate,
+            description: obj.Description,
+            location: obj.Address,
+            lat: obj.Latitude,
+            lon: obj.Longitude,
+            power: obj.SystemPower,
+            production: obj.AnnualProduction,
+            cO2: obj.CO2,
+            reimbursement: obj.Reimbursement,
+            modules: obj.modules,
+            azimuth: obj.AzimuthAngle,
+            communication: obj.Communication,
+            inverter: obj.Inverter,
+            sensors: obj.Sensors,
+            inclination: obj.Inclination,
+
+        };
+
+        prunePoints(pv);
+
+    }
+
+    var pv_test = {
         id: 1,
         name: "UCY PV's",
         lon: 33.425217,
@@ -172,7 +204,6 @@ function loadPVs() {
         inverter: "3 x Sunny Boy 3300TL HC",
         sensors: "Sunny Sensorbox"
     };
-    prunePoints(pv);
 
 
 }
@@ -180,18 +211,49 @@ function loadPVs() {
 function createPV() {
 
     phpfile = 'create.php';
-    var data = new FormData(document.getElementById("pv_form"));
 
-    ajaxCallPOST("POST", phpfile, data);
+    var updatedData = new FormData(document.getElementById("pv_form"));
+
+    var json = {
+
+        name: updatedData.get('name'),
+        location: updatedData.get('location'),
+        operator: updatedData.get('operator'),
+        commission: updatedData.get('commission'),
+        description: updatedData.get('description'),
+        power: updatedData.get('power'),
+        production: updatedData.get('production'),
+        cO2: updatedData.get('co2'),
+        reimbursement: updatedData.get('reimbursement'),
+        modules: updatedData.get('modules'),
+        azimuth: updatedData.get('azimuth'),
+        inclination: updatedData.get('inclination'),
+        communication: updatedData.get('communication'),
+        inverter: updatedData.get('inverter'),
+        sensors: updatedData.get('sensors'),
+        lat: updatedData.get('lat'),
+        lon: updatedData.get('lon')
+
+    };
+
+    //ajaxCallPOST("POST", phpfile, json);
+	    $(document).ready(function () {
+        $.ajax({
+            type: "POST",
+            url: phpfile,
+            data: json,
+            success: function(data) {alertSuccessFailure(data);}
+        });
+    });
 }
 
 
 function alertSuccessFailure(data) {
 
-    if ((data == "Your PV is uploaded successfully.") || (data == "Your PV was deleted successfully") || (data == "Your PV was updated successfully")) {
-        swal({
+    if (data == 1) {
+		swal({
             type: 'success',
-            title: data,
+            title: "SUCCESS",
             showConfirmButton: false,
             timer: 1500
         });
@@ -212,12 +274,8 @@ function updatePV(data) {
     phpfile = "update.php";
 
     var updatedData = new FormData(document.getElementById("pv_form"));
-
-    // check if some data weren't change.
-    if (!updatedData.get('photo'))
-        updatedData.set('photo', data.photo);
     if (!updatedData.get('name'))
-        updatedData.set('location', data.name);
+        updatedData.set('name', data.name);
     if (!updatedData.get('location'))
         updatedData.set('location', data.location);
     if (!updatedData.get('operator'))
@@ -246,8 +304,35 @@ function updatePV(data) {
         updatedData.set('inverter', data.inverter);
     if (!updatedData.get('sensors'))
         updatedData.set('sensors', data.sensors);
+    var json = {
+        id: data.id,
+        name: updatedData.get('name'),
+        location: updatedData.get('location'),
+        operator: updatedData.get('operator'),
+        commission: updatedData.get('commission'),
+        description: updatedData.get('description'),
+        power: updatedData.get('power'),
+        production: updatedData.get('production'),
+        cO2: updatedData.get('co2'),
+        reimbursement: updatedData.get('reimbursement'),
+        modules: updatedData.get('modules'),
+        azimuth: updatedData.get('azimuth'),
+        inclination: updatedData.get('inclination'),
+        communication: updatedData.get('communication'),
+        inverter: updatedData.get('inverter'),
+        sensors: updatedData.get('sensors')
 
-    ajaxCallPOST("UPDATE", phpfile, updatedData, "",)
+    };
+
+    //ajaxCallPOST("UPDATE", phpfile, json, "",)
+	    $(document).ready(function () {
+        $.ajax({
+            type: "POST",
+            url: "update.php",
+            data: json,
+            success: function(data) {alertSuccessFailure(data);}
+        });
+    });
 
 }
 
@@ -255,40 +340,14 @@ function deletePV(data) {
 
     phpfile = "delete.php";
 
-    ajaxCall("DELETE", phpfile, data.id, "", alertSuccessFailure());
-
-}
-
-// this is for create and update
-// the request/response should be in json format..
-function ajaxCallPOST(request_type, url, data) {
-
-    $(document).ready(function () {
+     $(document).ready(function () {
         $.ajax({
-            type: request_type,
-            url: url,
-            data: data,
-            processData: false,
-            contentType: false,
+            type: "POST",
+            url: "delete.php",
+            data: {id: data.id},
             success: alertSuccessFailure
         });
     });
-
-}
-
-// this is for load and delete
-function ajaxCall(request_type, url, data, dataType, fun) {
-
-    $(document).ready(function () {
-        $.ajax({
-            type: request_type,
-            url: url,
-            data: data,
-            dataType: dataType,
-            success: fun
-        });
-    });
-
 }
 
 function prunePoints(pv) {
