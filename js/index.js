@@ -16,7 +16,7 @@ function checkCredentials() {
     $(document).ready(function () {
         $.ajax({
             type: "POST",
-            url: "php/login.php",
+            url: "login.php",
             data: {
                 username: document.getElementById('uname').value,
                 password: document.getElementById('pass').value
@@ -29,7 +29,7 @@ function checkCredentials() {
                         swal({
                             type: 'error',
                             title: 'Oops...',
-                            text: 'You gave wrong username or password'
+                            text: 'You gave wrong username or password' + response
                         });
                     }
                     else window.location.replace("bye.html");

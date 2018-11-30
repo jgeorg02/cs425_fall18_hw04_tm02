@@ -57,7 +57,7 @@ function editModal(lat, lon, exists, data) {
 
     var form = "";
 
-    if (exists) form = '<div class="figure" style="background-image: url(' + data.photo + ');"></div><br /><label class="btn btn-secondary"><input type="file" id="photo" name="photo">Upload Photo:</label>';
+    if (exists) form = '<div class="figure"></div><br /><label class="btn btn-secondary"><input type="file" id="photo" name="photo">Upload Photo:</label>';
 
     form += '<form id="pv_form" name="pv_form" method="post"><div class="form-group">' +
         '<label for="name">Name:</label><input type="text" class="form-control" id="name" name="name" placeholder="' + data.name + '">' +
@@ -100,7 +100,7 @@ pruneCluster.PrepareLeafletMarker = function (leafletMarker, data) {
 
     leafletMarker.on('click', function () {
 
-        var info = "<div class='figure' style='background-image: url('" + data.photo + "');'></div>" + "<br /><b>Location:</b> " + data.location + " " + data.coordinates + "<br /><b>Operator: </b> " +
+        var info = "<div class='figure'></div>" + "<br /><b>Location:</b> " + data.location + " " + data.coordinates + "<br /><b>Operator: </b> " +
             data.operator + "<br /><b>Commission: </b> " + data.commission + "<br /><b>Description: </b> " + data.description +
             "<br /><b>System Power: </b> " + data.power + "<br /><b>Annual Production: </b> " + data.production +
             "<br /><b>CO2 Avoided: </b> " + data.cO2 + "<br /><b>Reimbursement: </b> " + data.reimbursement +
@@ -139,11 +139,20 @@ function mapLoad() {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(mymap);
 
-    ajaxCall("GET", "get.php", "", "json", loadPVs);
-
+    
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "get.php",
+            dataType: "json",
+            success: loadPVs
+        });
+    });
 }
 
 function loadPVs(json) {
+        pruneCluster.RemoveMarkers();
+        pruneCluster.ProcessView();
 
     var obj;
     var pv;
@@ -206,6 +215,20 @@ function loadPVs(json) {
     };
 
 
+
+    pruneCluster.ProcessView();
+}
+
+function reloadPoints() {
+
+    $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "get.php",
+            dataType: "json",
+            success: loadPVs
+        });
+    });
 }
 
 function createPV() {
@@ -236,15 +259,15 @@ function createPV() {
 
     };
 
-    //ajaxCallPOST("POST", phpfile, json);
-	    $(document).ready(function () {
+    $(document).ready(function () {
         $.ajax({
             type: "POST",
             url: phpfile,
             data: json,
-            success: function(data) {alertSuccessFailure(data);}
+            success: function(data) {alertSuccessFailure(data); reloadPoints();}
         });
     });
+
 }
 
 
@@ -265,7 +288,7 @@ function alertSuccessFailure(data) {
             text: data
         });
     }
-
+reloadPoints();
 
 }
 
@@ -324,15 +347,15 @@ function updatePV(data) {
 
     };
 
-    //ajaxCallPOST("UPDATE", phpfile, json, "",)
-	    $(document).ready(function () {
+    $(document).ready(function () {
         $.ajax({
             type: "POST",
             url: "update.php",
             data: json,
-            success: function(data) {alertSuccessFailure(data);}
+            success: function(data) {alertSuccessFailure(data); reloadPoints();}
         });
     });
+
 
 }
 
@@ -348,11 +371,12 @@ function deletePV(data) {
             success: alertSuccessFailure
         });
     });
+	
 }
 
 function prunePoints(pv) {
 
-    var prune_marker = new PruneCluster.Marker(lat, lon);
+    var prune_marker = new PruneCluster.Marker(pv.lat, pv.lon);
 
     prune_marker.data.id = pv.id;
     prune_marker.data.name = pv.name;
