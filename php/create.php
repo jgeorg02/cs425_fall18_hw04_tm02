@@ -5,6 +5,24 @@ include 'ConnectionDatabase.php';
 
 header('Content-Type: text/plain; charset=utf-8');
 
+if(!isset($_COOKIE['username'])) {
+    echo 0;
+}
+
+else {
+
+// Name - Query
+$query = $connection->prepare("SELECT Password FROM user WHERE Username='" . $_COOKIE['username'] . "'"); // querying the database
+$query->execute();
+if ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+        $pass = $row['Password'];
+}
+
+else $result = 0;
+
+if ($_COOKIE['pass'] == $pass)  {
+
+
 $id;
 
 $name = $_POST['name'];
@@ -105,10 +123,17 @@ try {
     $query = $connection->prepare("INSERT INTO hardware (id, Modules, AzimuthAngle, InclinationAngle, Communication, Inverter,Sensors) VALUES ('$id','$modules', '$azimuth', '$inclination', '$communication', '$inverter', '$sensors')");
     $query->execute();
 
-    echo 1;
+
 
 } catch (RuntimeException $e) {
 
     echo $e->getMessage();
 
 }
+   $result = 1;
+}
+else $result = 0;
+
+echo $result;
+}
+

@@ -22,7 +22,7 @@ function checkCredentials() {
                 password: document.getElementById('pass').value
             },
             success: function(response) {
-                if (response == 'success')
+                if (response == 1)
                     window.location.replace("map.html");
                 else {
                     if (tried <= 3){

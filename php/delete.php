@@ -7,7 +7,23 @@ header('Content-Type: text/plain; charset=utf-8');
 
 $id=$_POST['id'];
 
-try {
+if(!isset($_COOKIE['username'])) {
+    echo 0;
+}
+
+else {
+
+// Name - Query
+$query = $connection->prepare("SELECT Password FROM user WHERE Username='" . $_COOKIE['username'] . "'"); // querying the database
+$query->execute();
+if ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+        $pass = $row['Password'];
+}
+
+else $result = 0;
+
+if ($_COOKIE['pass'] == $pass)  {
+
 
     // Delete - General table
     $query = $connection->prepare("DELETE FROM general WHERE id=$id"); // querying the database
@@ -21,10 +37,10 @@ try {
     $query = $connection->prepare("DELETE FROM hardware WHERE id=$id"); // querying the database
     $query->execute();
 
-    echo 1;
-
-} catch (RuntimeException $e) {
-
-    echo $e->getMessage();
-
+    $result = 1;
 }
+else $result = 0;
+
+echo $result;
+}
+

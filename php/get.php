@@ -5,6 +5,23 @@ include 'ConnectionDatabase.php';
 
 header('Content-Type: text/plain; charset=utf-8');
 
+if(!isset($_COOKIE['username'])) {
+    echo 0;
+}
+
+else {
+
+// Name - Query
+$query = $connection->prepare("SELECT Password FROM user WHERE Username='" . $_COOKIE['username'] . "'"); // querying the database
+$query->execute();
+if ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+        $pass = $row['Password'];
+}
+
+else $result = 0;
+
+if ($_COOKIE['pass'] == $pass)  {
+
 $id;
 
 $name;
@@ -36,45 +53,6 @@ $idArray =$nameArray = $operatorArray = $comissionArray = $descriptionArray = $a
 $powerArray = $annualArray = $productionArray = $co2Array = $reimbursementArray =  array();
 $modulesArray = $azimuthArray = $inclinationArray = $communicationArray = $inverterArray = $sensorsArray =  array();
 $jsonArray = array();
-
-
-try {
-    /**
-    if (!$name || !$location || !$operator || !$commission || !$description || !$power || !$production || !$co2 || !$reimbursement)
-       throw new RuntimeException('You should fill all the required fields');
-
-    // Undefined | Multiple Files | $_FILES Corruption Attack
-    // If this request falls under any of them, treat it invalid.
-     if (
-        !isset($_FILES['photo']['error']) ||
-       is_array($_FILES['photo']['error'])
-    ) {
-        throw new RuntimeException('Invalid photo parameters.');
-    }
-
-    // You should also check filesize here.
-    if ($_FILES['photo']['size'] == 0) {
-        $photo = ""; // then no file was sent
-    } else {
-
-        // Check MIME Type by yourself.
-        $finfo = new finfo(FILEINFO_MIME_TYPE);
-        if (false === $ext = array_search(
-                $finfo->file($_FILES['photo']['tmp_name']),
-                array(
-                    'jpg' => 'image/jpeg',
-                    'png' => 'image/png',
-                    'gif' => 'image/gif',
-                ),
-                true
-            )) {
-            throw new RuntimeException('Invalid photo format.');
-        }
-    }
-
-    echo 'Your PV is uploaded successfully.';
-     */
-
 
     // general - table
 
@@ -240,11 +218,10 @@ try {
     }
 
 
-    echo json_encode($jsonArray);
-
-
-} catch (RuntimeException $e) {
-
-    echo $e->getMessage();
-
+    $result = json_encode($jsonArray);
 }
+else $result = 0;
+
+echo $result;
+}
+

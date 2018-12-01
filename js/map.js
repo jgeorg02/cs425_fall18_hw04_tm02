@@ -131,6 +131,15 @@ window.onload = mapLoad;
 
 function mapLoad() {
 
+   $(document).ready(function () {
+        $.ajax({
+            type: "GET",
+            url: "bonus.php",
+            dataType: "text",
+            success: function(data) {if (data == 0) window.location.replace("bye.html")}
+        });
+    });
+
 // initialize map with tiles:
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18,
@@ -148,6 +157,7 @@ function mapLoad() {
             success: loadPVs
         });
     });
+
 }
 
 function loadPVs(json) {
@@ -368,7 +378,7 @@ function deletePV(data) {
             type: "POST",
             url: "delete.php",
             data: {id: data.id},
-            success: alertSuccessFailure
+            success: function (data) {alertSuccessFailure(data); reloadPoints();}
         });
     });
 	
